@@ -70,7 +70,13 @@ function createKeywordBanner(keywordsFound) {
     font-size: 16px;
     font-weight: normal;
   `;
-  closeBtn.onclick = () => banner.remove();
+  closeBtn.onclick = () => {
+    banner.remove();
+    const jobContent = document.querySelector("#job-details");
+    if (jobContent) {
+      jobContent.dataset.bannerDismissed = "true";
+    }
+  };
 
   const uniqueKeywords = [...new Set(keywordsFound.map(k => k.toUpperCase()))];
   const text = document.createTextNode(`⚠️ Sponsorship-related terms detected: ${uniqueKeywords.join(", ")}`);
@@ -91,7 +97,11 @@ function createKeywordBanner(keywordsFound) {
 
 function handleJobDescriptionChange() {
   const jobContent = document.querySelector("#job-details");
-  if (!jobContent || jobContent.dataset.keywordsHighlighted === "true") return;
+  if (
+    !jobContent ||
+    jobContent.dataset.keywordsHighlighted === "true" ||
+    jobContent.dataset.bannerDismissed === "true"
+  ) return;
 
   const maxRetries = 20;
   let tries = 0;
