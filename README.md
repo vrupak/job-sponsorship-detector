@@ -9,7 +9,6 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 * Detects and highlights keywords like `H1B`, `visa`, `sponsorship`, etc.
 * Green background with black text for clear visibility
 * Automatically works as you browse different job listings
-* Optimized to avoid freezing or unnecessary DOM re-renders
 
 ---
 
