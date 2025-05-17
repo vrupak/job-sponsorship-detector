@@ -25,44 +25,117 @@ function highlightText(textNode) {
 function highlightKeywordsIn(container) {
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   const nodes = [];
+  const matchedKeywords = [];
 
   while (walker.nextNode()) nodes.push(walker.currentNode);
 
   nodes.forEach(node => {
-    if (keywordRegex.test(node.textContent)) {
+    const matches = node.textContent.match(keywordRegex);
+    if (matches) {
+      matchedKeywords.push(...matches.map(m => m.toUpperCase()));
       highlightText(node);
     }
   });
+
+  if (matchedKeywords.length > 0) {
+    createKeywordBanner(matchedKeywords);
+  }
+}
+
+function createKeywordBanner(keywordsFound) {
+  if (document.getElementById("keyword-alert-banner")) return;
+
+  const banner = document.createElement("div");
+  banner.id = "keyword-alert-banner";
+  banner.style.cssText = `
+    background: #fffbe6;
+    color: #000;
+    padding: 12px 16px;
+    border-left: 5px solid #faad14;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    position: relative;
+    z-index: 1000;
+  `;
+
+  const closeBtn = document.createElement("span");
+  closeBtn.textContent = "✖";
+  closeBtn.style.cssText = `
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: normal;
+  `;
+  closeBtn.onclick = () => banner.remove();
+
+  const uniqueKeywords = [...new Set(keywordsFound.map(k => k.toUpperCase()))];
+  const text = document.createTextNode(`⚠️ Sponsorship-related terms detected: ${uniqueKeywords.join(", ")}`);
+  banner.appendChild(text);
+  banner.appendChild(closeBtn);
+
+  const tryInsert = () => {
+    const jobDetails = document.querySelector("#job-details");
+    if (jobDetails && jobDetails.parentElement) {
+      jobDetails.parentElement.insertBefore(banner, jobDetails);
+    } else {
+      setTimeout(tryInsert, 100);
+    }
+  };
+
+  tryInsert();
 }
 
 function handleJobDescriptionChange() {
   const jobContent = document.querySelector("#job-details");
-  if (jobContent && !jobContent.dataset.keywordsHighlighted) {
-    requestIdleCallback(() => {
+  if (!jobContent || jobContent.dataset.keywordsHighlighted === "true") return;
+
+  const maxRetries = 20;
+  let tries = 0;
+
+  const waitForContent = () => {
+    const text = jobContent.innerText.trim();
+    if (text.length > 50) {
       highlightKeywordsIn(jobContent);
       jobContent.dataset.keywordsHighlighted = "true";
-    });
-  }
+    } else if (tries++ < maxRetries) {
+      setTimeout(waitForContent, 200);
+    }
+  };
+
+  waitForContent();
 }
 
 function waitForJobChanges() {
   const wrapper = document.querySelector(".jobs-search__job-details--wrapper");
   if (!wrapper) return;
 
-  const observer = new MutationObserver(() => {
-    // clear flag so keywords are re-applied on next job click
-    const jobContent = document.querySelector("#job-details");
-    if (jobContent) delete jobContent.dataset.keywordsHighlighted;
+  let debounceTimer;
 
-    setTimeout(handleJobDescriptionChange, 100);
+  const observer = new MutationObserver(() => {
+    clearTimeout(debounceTimer);
+
+    debounceTimer = setTimeout(() => {
+      const jobContent = document.querySelector("#job-details");
+      if (jobContent) {
+        delete jobContent.dataset.keywordsHighlighted;
+      }
+
+      const oldBanner = document.getElementById("keyword-alert-banner");
+      if (oldBanner) oldBanner.remove();
+
+      handleJobDescriptionChange();
+    }, 250);
   });
 
   observer.observe(wrapper, { childList: true, subtree: true });
-  handleJobDescriptionChange(); // initial run
+  handleJobDescriptionChange();
 }
 
 window.addEventListener("load", () => {
-  // Wait until LinkedIn fully renders job details
   const checkInterval = setInterval(() => {
     const wrapper = document.querySelector(".jobs-search__job-details--wrapper");
     if (wrapper) {
