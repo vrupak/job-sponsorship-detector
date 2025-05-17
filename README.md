@@ -6,8 +6,10 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 
 ## Features
 
-* Detects and highlights keywords like `H1B`, `visa`, `sponsorship`, etc.
-* Green background with black text for clear visibility
+* Detects and highlights keywords like `H1B`, `visa`, `sponsorship`, `OPT`, `CPT`, etc.
+* Displays a summary banner indicating detected keywords or absence of sponsorship terms
+* Smart detection that refreshes highlights and banner when browsing between job listings
+* Green background with black text for keyword visibility
 * Automatically works as you browse different job listings
 
 ---
@@ -30,7 +32,7 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 
 4. Click **"Load unpacked"** and select the `job-sponsorship-detector/` folder
 
-5. Navigate to any LinkedIn job page and click a job listing — keywords should automatically be highlighted in green.
+5. Navigate to any LinkedIn job page and click a job listing — keywords should automatically be highlighted and banner displayed.
 
 ---
 
@@ -38,7 +40,8 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 
 * Uses a MutationObserver to detect when new job descriptions are loaded
 * Uses a TreeWalker to efficiently scan and highlight only the relevant text nodes
-* Ensures keywords are only highlighted once per load using a flag
+* Shows a dismissible banner with detected sponsorship keywords
+* Ensures keywords and banners reset with each new job listing
 
 ---
 

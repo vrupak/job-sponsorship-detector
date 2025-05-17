@@ -1,7 +1,10 @@
 const keywords = [
-  "h1b", "visa", "sponsorship", "work permit", "immigration",
-  "green card", "OPT", "authorization", "citizen", "resident",
-  "H-1B", "authorized"
+  "h1b", "h-1b", "visa", "sponsorship", "sponsored",
+  "work permit", "immigration", "green card", "OPT", "CPT",
+  "authorization", "authorized", "citizen", "resident",
+  "EAD", "employment authorization", "TN visa", "L1", "L-1",
+  "O-1", "J-1", "F1", "F-1", "GC",  "international candidate", 
+  "US work eligibility"
 ];
 
 const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "gi");
