@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Job Sponsorship Highlighter",
+  "version": "1.0",
+  "description": "Highlights visa sponsorship keywords in LinkedIn job descriptions.",
+  "permissions": ["scripting"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.linkedin.com/jobs/*"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "assets/icon.png"
+  }
+}
