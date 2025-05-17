@@ -38,65 +38,24 @@ function highlightKeywordsIn(container) {
   });
 
   if (matchedKeywords.length > 0) {
-    createKeywordBanner(matchedKeywords);
+    const unique = [...new Set(matchedKeywords)];
+    createBanner({
+      text: "Sponsorship-related terms detected:",
+      keywords: unique,
+      background: "#fffbe6",
+      borderColor: "#faad14"
+    });
   } else {
-    createNoKeywordBanner();
+    createBanner({
+      text: "No sponsorship-related keywords found in this job description.",
+      keywords: [],
+      background: "#e6f7ff",
+      borderColor: "#1890ff"
+    });
   }
 }
 
-function createKeywordBanner(keywordsFound) {
-  if (document.getElementById("keyword-alert-banner")) return;
-
-  const banner = document.createElement("div");
-  banner.id = "keyword-alert-banner";
-  banner.style.cssText = `
-    background: #fffbe6;
-    color: #000000;
-    padding: 12px 16px;
-    border-left: 5px solid #faad14;
-    border-radius: 6px;
-    margin-bottom: 14px;
-    font-size: 16px;
-    position: relative;
-    z-index: 1000;
-  `;
-
-  const closeBtn = document.createElement("span");
-  closeBtn.textContent = "✖";
-  closeBtn.style.cssText = `
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: normal;
-  `;
-  closeBtn.onclick = () => {
-    banner.remove();
-    const jobContent = document.querySelector("#job-details");
-    if (jobContent) {
-      jobContent.dataset.bannerDismissed = "true";
-    }
-  };
-
-  const uniqueKeywords = [...new Set(keywordsFound.map(k => k.toUpperCase()))];
-  const text = document.createTextNode(`Sponsorship-related terms detected: ${uniqueKeywords.join(", ")}`);
-  banner.appendChild(text);
-  banner.appendChild(closeBtn);
-
-  const tryInsert = () => {
-    const jobDetails = document.querySelector("#job-details");
-    if (jobDetails && jobDetails.parentElement) {
-      jobDetails.parentElement.insertBefore(banner, jobDetails);
-    } else {
-      setTimeout(tryInsert, 100);
-    }
-  };
-
-  tryInsert();
-}
-
-function createNoKeywordBanner() {
+function createBanner({ text, keywords = [], background, borderColor }) {
   const jobContent = document.querySelector("#job-details");
   if (!jobContent || jobContent.dataset.bannerDismissed === "true") return;
   if (document.getElementById("keyword-alert-banner")) return;
@@ -104,15 +63,16 @@ function createNoKeywordBanner() {
   const banner = document.createElement("div");
   banner.id = "keyword-alert-banner";
   banner.style.cssText = `
-    background: #e6f7ff;
+    background: ${background};
     color: #000;
     padding: 12px 16px;
-    border-left: 5px solid #1890ff;
+    border-left: 5px solid ${borderColor};
     border-radius: 6px;
-    margin-bottom: 14px;
+    margin: 16px 0;
     font-size: 16px;
     position: relative;
     z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   `;
 
   const closeBtn = document.createElement("span");
@@ -130,11 +90,30 @@ function createNoKeywordBanner() {
     if (jobContent) jobContent.dataset.bannerDismissed = "true";
   };
 
-  const text = document.createTextNode(`No sponsorship-related keywords found in this job description.`);
-  banner.appendChild(text);
+  banner.innerHTML = "";
+
+  const styledKeywords = keywords.map(kw => {
+    return `<span style="color: black; font-weight:bold;">${kw}</span>`;
+  }).join(", ");
+
+  const message = document.createElement("div");
+  message.innerHTML = keywords.length > 0
+    ? `${text} ${styledKeywords}`
+    : text;
+
+  banner.appendChild(message);
   banner.appendChild(closeBtn);
 
-  jobContent.parentElement.insertBefore(banner, jobContent);
+  const tryInsert = () => {
+    const mt4Div = document.querySelector("div.mt4");
+    if (mt4Div && mt4Div.parentElement) {
+      mt4Div.parentElement.insertBefore(banner, mt4Div.nextSibling);
+    } else {
+      setTimeout(tryInsert, 100);
+    }
+  };
+
+  tryInsert();
 }
 
 function handleJobDescriptionChange() {
@@ -179,7 +158,6 @@ function waitForJobChanges() {
       if (currentText && currentText !== lastJobText) {
         lastJobText = currentText;
 
-        // Reset highlighting and banner ONLY if content changed
         delete jobContent.dataset.keywordsHighlighted;
         delete jobContent.dataset.bannerDismissed;
 
