@@ -132,6 +132,7 @@ function waitForJobChanges() {
       const jobContent = document.querySelector("#job-details");
       if (jobContent) {
         delete jobContent.dataset.keywordsHighlighted;
+        delete jobContent.dataset.bannerDismissed;
       }
 
       const oldBanner = document.getElementById("keyword-alert-banner");
