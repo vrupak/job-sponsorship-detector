@@ -18,7 +18,7 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 1. **Download or clone** this repo to your computer:
 
    ```bash
-   git clone https://github.com/your-username/linkedin-sponsorship-highlighter.git
+   git clone https://github.com/vrupak/job-sponsorship-detector.git
    ```
 
 2. **Open Chrome** and go to:
@@ -29,7 +29,7 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 
 3. **Enable Developer Mode** (top-right toggle)
 
-4. Click **"Load unpacked"** and select the `linkedin-sponsorship-highlighter/` folder
+4. Click **"Load unpacked"** and select the `job-sponsorship-detector/` folder
 
 5. Navigate to any LinkedIn job page and click a job listing — keywords should automatically be highlighted in green.
 
