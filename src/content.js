@@ -12,7 +12,7 @@ function highlightText(textNode) {
 
   const span = document.createElement("span");
   span.innerHTML = textNode.textContent.replace(keywordRegex, match => {
-    return `<span style="background-color: limegreen; color: black;">${match}</span>`;
+    return `<span style="background-color: limegreen; color: black; font-weight: bold;">${match}</span>`;
   });
 
   try {
@@ -51,13 +51,12 @@ function createKeywordBanner(keywordsFound) {
   banner.id = "keyword-alert-banner";
   banner.style.cssText = `
     background: #fffbe6;
-    color: #000;
+    color: #000000;
     padding: 12px 16px;
     border-left: 5px solid #faad14;
     border-radius: 6px;
     margin-bottom: 14px;
-    font-size: 15px;
-    font-weight: bold;
+    font-size: 16px;
     position: relative;
     z-index: 1000;
   `;
@@ -67,9 +66,9 @@ function createKeywordBanner(keywordsFound) {
   closeBtn.style.cssText = `
     position: absolute;
     top: 6px;
-    right: 10px;
+    right: 6px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 10px;
     font-weight: normal;
   `;
   closeBtn.onclick = () => {
@@ -111,8 +110,7 @@ function createNoKeywordBanner() {
     border-left: 5px solid #1890ff;
     border-radius: 6px;
     margin-bottom: 14px;
-    font-size: 15px;
-    font-weight: bold;
+    font-size: 16px;
     position: relative;
     z-index: 1000;
   `;
@@ -122,9 +120,9 @@ function createNoKeywordBanner() {
   closeBtn.style.cssText = `
     position: absolute;
     top: 6px;
-    right: 10px;
+    right: 6px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 10px;
     font-weight: normal;
   `;
   closeBtn.onclick = () => {
