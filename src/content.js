@@ -43,13 +43,25 @@ function loadSponsoringCompanies() {
 function checkCurrentCompany() {
   currentCompanySponsorsVisas = false;
 
-  const companyNameElement = document.querySelector(".job-details-jobs-unified-top-card__company-name a[data-test-app-aware-link]");
-  if (!companyNameElement) {
-    console.warn("[Visa Scanner] Company name element not found.");
+  let companyName = null;
+
+  // First try: anchor tag (most common case)
+  const companyAnchor = document.querySelector(".job-details-jobs-unified-top-card__company-name a[data-test-app-aware-link]");
+  if (companyAnchor) {
+    companyName = companyAnchor.textContent.trim();
+  } else {
+    // Fallback: div without anchor
+    const companyDiv = document.querySelector(".job-details-jobs-unified-top-card__company-name");
+    if (companyDiv) {
+      companyName = companyDiv.textContent.trim();
+    }
+  }
+
+  if (!companyName) {
+    console.warn("[Visa Scanner] Company name not found.");
     return;
   }
 
-  const companyName = companyNameElement.textContent.trim().toLowerCase();
   console.log("[Visa Scanner] Detected company name:", companyName);
 
   // Normalize both strings
@@ -73,7 +85,6 @@ function checkCurrentCompany() {
 
   console.log("[Visa Scanner] Sponsorship match found?", currentCompanySponsorsVisas);
 }
-
 
 function highlightText(textNode) {
   const parent = textNode.parentNode;
