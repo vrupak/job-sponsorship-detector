@@ -14,4 +14,8 @@
   "icons": {
     "48": "assets/icon.png"
   }
+  "web_accessible_resources": [{
+    "resources": ["data/companies.csv"],
+    "matches": ["<all_urls>"]
+  }]
 }
