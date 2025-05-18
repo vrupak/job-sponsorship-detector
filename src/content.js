@@ -3,11 +3,13 @@ const keywords = [
   "work permit", "immigration", "green card", "OPT", "CPT",
   "authorization", "authorized", "citizen", "resident",
   "EAD", "employment authorization", "TN visa", "L1", "L-1",
-  "O-1", "J-1", "F1", "F-1", "GC",  "international candidate", 
+  "O-1", "J-1", "F1", "F-1", "GC", "international candidate",
   "US work eligibility"
 ];
 
 const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "gi");
+const keywordOccurrences = {};
+const keywordCounter = {};
 
 function highlightText(textNode) {
   const parent = textNode.parentNode;
@@ -15,20 +17,29 @@ function highlightText(textNode) {
 
   const span = document.createElement("span");
   span.innerHTML = textNode.textContent.replace(keywordRegex, match => {
-    return `<span style="background-color: #faad14; color: black; font-weight: bold;">${match}</span>`;
+    const key = match.toLowerCase();
+    keywordCounter[key] = (keywordCounter[key] || 0) + 1;
+    const id = `${key.replace(/\s+/g, "-")}-${keywordCounter[key]}`;
+
+    if (!keywordOccurrences[key]) keywordOccurrences[key] = [];
+    keywordOccurrences[key].push(id);
+
+    return `<span id="${id}" style="background-color: #faad14; color: black; font-weight: bold;">${match}</span>`;
   });
 
   try {
     parent.replaceChild(span, textNode);
-  } catch (e) {
-    // Ignore nodes that can't be replaced
-  }
+  } catch (e) {}
 }
 
 function highlightKeywordsIn(container) {
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   const nodes = [];
   const matchedKeywords = [];
+
+  // Reset
+  Object.keys(keywordOccurrences).forEach(k => delete keywordOccurrences[k]);
+  Object.keys(keywordCounter).forEach(k => delete keywordCounter[k]);
 
   while (walker.nextNode()) nodes.push(walker.currentNode);
 
@@ -40,8 +51,8 @@ function highlightKeywordsIn(container) {
     }
   });
 
-  if (matchedKeywords.length > 0) {
-    const unique = [...new Set(matchedKeywords)];
+  const unique = [...new Set(matchedKeywords)];
+  if (unique.length > 0) {
     createBanner({
       text: "Sponsorship-related terms detected:",
       keywords: unique,
@@ -95,14 +106,29 @@ function createBanner({ text, keywords = [], background, borderColor }) {
 
   banner.innerHTML = "";
 
-  const styledKeywords = keywords.map(kw => {
-    return `<span style="color: black; font-weight:bold;">${kw}</span>`;
-  }).join(", ");
-
   const message = document.createElement("div");
-  message.innerHTML = keywords.length > 0
-    ? `${text} ${styledKeywords}`
-    : text;
+  if (keywords.length > 0) {
+    const parts = keywords.map(kw => {
+      const key = kw.toLowerCase();
+      const ids = keywordOccurrences[key] || [];
+      const base = key.replace(/\s+/g, "-");
+
+      if (ids.length === 1) {
+        // Single occurrence → link the keyword itself
+        return `<a href="#${ids[0]}" onclick="event.preventDefault();document.getElementById('${ids[0]}').scrollIntoView({behavior:'smooth'});" style="font-weight: bold; color: black;">${kw}</a>`;
+      } else {
+        // Multiple → keyword + numbered links
+        const nums = ids.map((id, i) =>
+          `<a href="#${id}" onclick="event.preventDefault();document.getElementById('${id}').scrollIntoView({behavior:'smooth'});">${i + 1}</a>`
+        ).join(" ");
+        return `<span style="font-weight: bold;">${kw}</span> ${nums}`;
+      }
+    }).join(", ");
+
+    message.innerHTML = `${text} ${parts}`;
+  } else {
+    message.textContent = text;
+  }
 
   banner.appendChild(message);
   banner.appendChild(closeBtn);
