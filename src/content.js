@@ -31,6 +31,7 @@ function loadSponsoringCompanies() {
       // Process the current page with the loaded companies
       checkCurrentCompany();
       handleJobDescriptionChange();
+      markSponsoringCompaniesInSidebar();
     })
     .catch(error => {
       console.error('Error loading companies CSV file:', error);
@@ -315,6 +316,7 @@ function waitForJobChanges() {
         // Check if the company sponsors visas before handling the job description
         checkCurrentCompany();
         handleJobDescriptionChange();
+        markSponsoringCompaniesInSidebar();
       }
     }, 250);
   });
@@ -338,3 +340,34 @@ window.addEventListener("load", () => {
     }
   }, 500);
 });
+
+function markSponsoringCompaniesInSidebar() {
+  const sidebarCompanies = document.querySelectorAll(".artdeco-entity-lockup__subtitle span");
+
+  sidebarCompanies.forEach(span => {
+    if (span.querySelector("img.h1b-icon")) return; // Prevent duplicate icons
+
+    const companyText = span.textContent.trim();
+    const normalize = str =>
+      str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+    const normalizedCompany = normalize(companyText);
+
+    const isSponsor = sponsoringCompanies.some(rawCompany => {
+      const normalizedSponsor = normalize(rawCompany);
+      return (
+        normalizedCompany === normalizedSponsor ||
+        normalizedCompany.startsWith(normalizedSponsor) ||
+        normalizedSponsor.startsWith(normalizedCompany)
+      );
+    });
+
+    if (isSponsor) {
+      const icon = document.createElement("img");
+      icon.src = chrome.runtime.getURL("assets/h1b.png");
+      icon.alt = "H1B Sponsor";
+      icon.className = "h1b-icon";
+      icon.style.cssText = "width: 16px; height: 16px; margin-left: 6px; vertical-align: middle;";
+      span.appendChild(icon);
+    }
+  });
+}
