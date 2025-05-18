@@ -14,6 +14,7 @@ let currentCompanySponsorsVisas = false;
 const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "gi");
 const keywordOccurrences = {};
 const keywordCounter = {};
+const h1bIconUrl = chrome.runtime.getURL("assets/h1b-2.png");
 
 function normalizeCompanyName(name) {
   return name
@@ -342,21 +343,25 @@ window.addEventListener("load", () => {
 });
 
 function markSponsoringCompaniesInSidebar() {
-  const sidebarCompanies = document.querySelectorAll(".artdeco-entity-lockup__subtitle span");
+  try {
+    const sidebarCompanies = document.querySelectorAll(".artdeco-entity-lockup__subtitle span");
 
-  sidebarCompanies.forEach(span => {
-    if (span.querySelector("img.h1b-icon")) return; // Prevent duplicate icons
+    sidebarCompanies.forEach(span => {
+      if (span.querySelector("img.h1b-icon")) return; // Prevent duplicates
 
-    const companyText = span.textContent.trim();
-    const isSponsor = isSponsoringCompany(companyText);
-    // image ratio is 11:8
-    if (isSponsor) {
-      const icon = document.createElement("img");
-      icon.src = chrome.runtime.getURL("assets/h1b-2.png");
-      icon.alt = "H1B Sponsor";
-      icon.className = "h1b-icon";
-      icon.style.cssText = "width: 38.5px; height: 28px; margin-left: 6px; vertical-align: middle;";
-      span.appendChild(icon);
-    }
-  });
+      const companyText = span.textContent.trim();
+      const isSponsor = isSponsoringCompany(companyText);
+
+      if (isSponsor) {
+        const icon = document.createElement("img");
+        icon.src = h1bIconUrl;
+        icon.alt = "H1B Sponsor";
+        icon.className = "h1b-icon";
+        icon.style.cssText = "width: 38.5px; height: 28px; margin-left: 6px; vertical-align: middle;";
+        span.appendChild(icon);
+      }
+    });
+  } catch (e) {
+    console.warn("[Visa Scanner] markSponsoringCompaniesInSidebar failed:", e);
+  }
 }
