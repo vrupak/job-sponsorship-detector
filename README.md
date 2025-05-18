@@ -1,6 +1,6 @@
 # LinkedIn Sponsorship Keyword Highlighter Extension
 
-Highlights H1B and visa-related keywords in LinkedIn job descriptions and marks companies that sponsored visas in 2024 with a ✓. Displays a smart, dismissible banner with keyword links, and auto-refresh as you switch job listings.
+Highlights H1B and visa-related keywords in LinkedIn job descriptions, marks companies that sponsored visas in 2024 with a ✓, and adds a sponsorship icon next to company names in the job listing sidebar. Displays a smart, dismissible banner with keyword links and auto-refreshes as you switch job postings.
 
 ---
 
@@ -12,6 +12,7 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions and marks 
    - A summary of all detected keywords
    - Links that jump to the keyword location in the job description
    - A tooltip (`ⓘ`) with usage instructions (only shown if keywords are found)
+* Adds an H1-B icon next to company names in the job posting sidebar if they are known visa sponsors
 * Smart detection that refreshes highlights and banner when browsing between job listings
 
 ---
@@ -48,6 +49,7 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions and marks 
   - Optional company sponsorship note
   - Dismiss (✖) button that hides the banner until a new job is selected
 * **Company CSV** (`data/companies.csv`) is loaded once and matched with the job posting’s company name
+* **Sidebar Icons** – Company names in the left job sidebar are also scanned, and known sponsors are marked with an icon.
 
 ---
 
