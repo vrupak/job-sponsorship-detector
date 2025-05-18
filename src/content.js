@@ -15,6 +15,26 @@ const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "gi");
 const keywordOccurrences = {};
 const keywordCounter = {};
 
+function normalizeCompanyName(name) {
+  return name
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function isSponsoringCompany(name) {
+  const normalizedName = normalizeCompanyName(name);
+  return sponsoringCompanies.some(rawCompany => {
+    const normalizedSponsor = normalizeCompanyName(rawCompany);
+    return (
+      normalizedName === normalizedSponsor ||
+      normalizedName.startsWith(normalizedSponsor) ||
+      normalizedSponsor.startsWith(normalizedName)
+    );
+  });
+}
+
 // Load sponsoring companies from CSV file
 function loadSponsoringCompanies() {
   const fileUrl = chrome.runtime.getURL('data/companies.csv');
@@ -63,27 +83,7 @@ function checkCurrentCompany() {
     return;
   }
 
-  console.log("[Visa Scanner] Detected company name:", companyName);
-
-  // Normalize both strings
-  const normalize = str =>
-    str
-      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
-
-  const normalizedCompany = normalize(companyName);
-
-  currentCompanySponsorsVisas = sponsoringCompanies.some(rawCompany => {
-    const normalizedSponsor = normalize(rawCompany);
-    return (
-      normalizedCompany === normalizedSponsor ||
-      normalizedCompany.startsWith(normalizedSponsor) ||
-      normalizedSponsor.startsWith(normalizedCompany)
-    );
-  });
-
+  currentCompanySponsorsVisas = isSponsoringCompany(companyName);
   console.log("[Visa Scanner] Sponsorship match found?", currentCompanySponsorsVisas);
 }
 
@@ -348,25 +348,14 @@ function markSponsoringCompaniesInSidebar() {
     if (span.querySelector("img.h1b-icon")) return; // Prevent duplicate icons
 
     const companyText = span.textContent.trim();
-    const normalize = str =>
-      str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
-    const normalizedCompany = normalize(companyText);
-
-    const isSponsor = sponsoringCompanies.some(rawCompany => {
-      const normalizedSponsor = normalize(rawCompany);
-      return (
-        normalizedCompany === normalizedSponsor ||
-        normalizedCompany.startsWith(normalizedSponsor) ||
-        normalizedSponsor.startsWith(normalizedCompany)
-      );
-    });
-
+    const isSponsor = isSponsoringCompany(companyText);
+    // image ratio is 11:8
     if (isSponsor) {
       const icon = document.createElement("img");
-      icon.src = chrome.runtime.getURL("assets/h1b.png");
+      icon.src = chrome.runtime.getURL("assets/h1b-2.png");
       icon.alt = "H1B Sponsor";
       icon.className = "h1b-icon";
-      icon.style.cssText = "width: 16px; height: 16px; margin-left: 6px; vertical-align: middle;";
+      icon.style.cssText = "width: 38.5px; height: 28px; margin-left: 6px; vertical-align: middle;";
       span.appendChild(icon);
     }
   });

@@ -15,7 +15,7 @@
     "48": "assets/icon.png"
   },
   "web_accessible_resources": [{
-    "resources": ["data/companies.csv", "assets/h1b.png"],
+    "resources": ["data/companies.csv", "assets/h1b-2.png"],
     "matches": ["<all_urls>"]
   }]
 }
