@@ -7,11 +7,15 @@
   "content_scripts": [
     {
       "matches": ["*://www.linkedin.com/jobs/*"],
-      "js": ["src/content.js"],
+      "js": ["src/updated_code.js"],
       "run_at": "document_idle"
     }
   ],
   "icons": {
     "48": "assets/icon.png"
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["data/companies.csv"],
+    "matches": ["<all_urls>"]
+  }]
 }
