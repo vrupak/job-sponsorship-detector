@@ -43,7 +43,7 @@ function loadSponsoringCompanies() {
 function checkCurrentCompany() {
   currentCompanySponsorsVisas = false;
 
-  const companyNameElement = document.querySelector("a[data-test-app-aware-link]");
+  const companyNameElement = document.querySelector(".job-details-jobs-unified-top-card__company-name a[data-test-app-aware-link]");
   if (!companyNameElement) {
     console.warn("[Visa Scanner] Company name element not found.");
     return;
@@ -52,11 +52,11 @@ function checkCurrentCompany() {
   const companyName = companyNameElement.textContent.trim().toLowerCase();
   console.log("[Visa Scanner] Detected company name:", companyName);
 
-  // Normalize company name for flexible matching
+  // Normalize both strings
   const normalize = str =>
     str
-      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") // remove punctuation
-      .replace(/\s+/g, " ")                        // remove extra spaces
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+      .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
 
@@ -65,9 +65,9 @@ function checkCurrentCompany() {
   currentCompanySponsorsVisas = sponsoringCompanies.some(rawCompany => {
     const normalizedSponsor = normalize(rawCompany);
     return (
-      normalizedCompany === normalizedSponsor ||                   // exact
-      normalizedCompany.startsWith(normalizedSponsor) ||          // e.g. "google inc" vs "google"
-      normalizedSponsor.startsWith(normalizedCompany)             // reverse case
+      normalizedCompany === normalizedSponsor ||
+      normalizedCompany.startsWith(normalizedSponsor) ||
+      normalizedSponsor.startsWith(normalizedCompany)
     );
   });
 
