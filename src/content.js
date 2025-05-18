@@ -7,9 +7,73 @@ const keywords = [
   "US work eligibility"
 ];
 
+// Companies that have sponsored visas in the past (will be loaded from CSV)
+let sponsoringCompanies = [];
+let currentCompanySponsorsVisas = false;
+
 const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "gi");
 const keywordOccurrences = {};
 const keywordCounter = {};
+
+// Load sponsoring companies from CSV file
+function loadSponsoringCompanies() {
+  const fileUrl = chrome.runtime.getURL('data/companies.csv');
+  
+  fetch(fileUrl)
+    .then(response => response.text())
+    .then(csvData => {
+      // Parse CSV data - assuming simple CSV with one company per line
+      sponsoringCompanies = csvData
+        .split('\n')
+        .map(line => line.trim().toLowerCase())
+        .filter(company => company.length > 0);
+      
+      // Process the current page with the loaded companies
+      checkCurrentCompany();
+      handleJobDescriptionChange();
+    })
+    .catch(error => {
+      console.error('Error loading companies CSV file:', error);
+      // If file loading fails, continue with just visa keywords
+      handleJobDescriptionChange();
+    });
+}
+
+// Check if current company is in our sponsoring companies list
+function checkCurrentCompany() {
+  currentCompanySponsorsVisas = false;
+
+  const companyNameElement = document.querySelector(".job-details-jobs-unified-top-card__company-name a[data-test-app-aware-link]");
+  if (!companyNameElement) {
+    console.warn("[Visa Scanner] Company name element not found.");
+    return;
+  }
+
+  const companyName = companyNameElement.textContent.trim().toLowerCase();
+  console.log("[Visa Scanner] Detected company name:", companyName);
+
+  // Normalize both strings
+  const normalize = str =>
+    str
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  const normalizedCompany = normalize(companyName);
+
+  currentCompanySponsorsVisas = sponsoringCompanies.some(rawCompany => {
+    const normalizedSponsor = normalize(rawCompany);
+    return (
+      normalizedCompany === normalizedSponsor ||
+      normalizedCompany.startsWith(normalizedSponsor) ||
+      normalizedSponsor.startsWith(normalizedCompany)
+    );
+  });
+
+  console.log("[Visa Scanner] Sponsorship match found?", currentCompanySponsorsVisas);
+}
+
 
 function highlightText(textNode) {
   const parent = textNode.parentNode;
@@ -130,6 +194,13 @@ function createBanner({ text, keywords = [], background, borderColor }) {
     message.textContent = text;
   }
 
+  // Add company sponsorship info if applicable
+  if (currentCompanySponsorsVisas) {
+    const companyInfo = document.createElement("div");
+    companyInfo.innerHTML = `<div style="margin-top: 8px; font-weight: bold; color: #52c41a;">✓ This company has sponsored visas in the past</div>`;
+    message.appendChild(companyInfo);
+  }
+
   banner.appendChild(message);
   const infoIcon = document.createElement("span");
   infoIcon.innerHTML = "&#9432;"; // Minimal ⓘ icon
@@ -228,16 +299,24 @@ function waitForJobChanges() {
         const oldBanner = document.getElementById("keyword-alert-banner");
         if (oldBanner) oldBanner.remove();
 
+        // Check if the company sponsors visas before handling the job description
+        checkCurrentCompany();
         handleJobDescriptionChange();
       }
     }, 250);
   });
 
   observer.observe(wrapper, { childList: true, subtree: true });
+  
+  // Check if company sponsors visas
+  checkCurrentCompany();
   handleJobDescriptionChange();
 }
 
 window.addEventListener("load", () => {
+  // Load companies first
+  loadSponsoringCompanies();
+  
   const checkInterval = setInterval(() => {
     const wrapper = document.querySelector(".jobs-search__job-details--wrapper");
     if (wrapper) {
