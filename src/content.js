@@ -3,11 +3,77 @@ const keywords = [
   "work permit", "immigration", "green card", "OPT", "CPT",
   "authorization", "authorized", "citizen", "resident",
   "EAD", "employment authorization", "TN visa", "L1", "L-1",
-  "O-1", "J-1", "F1", "F-1", "GC",  "international candidate", 
+  "O-1", "J-1", "F1", "F-1", "GC", "international candidate",
   "US work eligibility"
 ];
 
+// Companies that have sponsored visas in the past (will be loaded from CSV)
+let sponsoringCompanies = [];
+let currentCompanySponsorsVisas = false;
+
 const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "gi");
+const keywordOccurrences = {};
+const keywordCounter = {};
+
+// Load sponsoring companies from CSV file
+function loadSponsoringCompanies() {
+  const fileUrl = chrome.runtime.getURL('data/companies.csv');
+  
+  fetch(fileUrl)
+    .then(response => response.text())
+    .then(csvData => {
+      // Parse CSV data - assuming simple CSV with one company per line
+      sponsoringCompanies = csvData
+        .split('\n')
+        .map(line => line.trim().toLowerCase())
+        .filter(company => company.length > 0);
+      
+      // Process the current page with the loaded companies
+      checkCurrentCompany();
+      handleJobDescriptionChange();
+    })
+    .catch(error => {
+      console.error('Error loading companies CSV file:', error);
+      // If file loading fails, continue with just visa keywords
+      handleJobDescriptionChange();
+    });
+}
+
+// Check if current company is in our sponsoring companies list
+function checkCurrentCompany() {
+  currentCompanySponsorsVisas = false;
+
+  const companyNameElement = document.querySelector(".job-details-jobs-unified-top-card__company-name a[data-test-app-aware-link]");
+  if (!companyNameElement) {
+    console.warn("[Visa Scanner] Company name element not found.");
+    return;
+  }
+
+  const companyName = companyNameElement.textContent.trim().toLowerCase();
+  console.log("[Visa Scanner] Detected company name:", companyName);
+
+  // Normalize both strings
+  const normalize = str =>
+    str
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  const normalizedCompany = normalize(companyName);
+
+  currentCompanySponsorsVisas = sponsoringCompanies.some(rawCompany => {
+    const normalizedSponsor = normalize(rawCompany);
+    return (
+      normalizedCompany === normalizedSponsor ||
+      normalizedCompany.startsWith(normalizedSponsor) ||
+      normalizedSponsor.startsWith(normalizedCompany)
+    );
+  });
+
+  console.log("[Visa Scanner] Sponsorship match found?", currentCompanySponsorsVisas);
+}
+
 
 function highlightText(textNode) {
   const parent = textNode.parentNode;
@@ -15,20 +81,29 @@ function highlightText(textNode) {
 
   const span = document.createElement("span");
   span.innerHTML = textNode.textContent.replace(keywordRegex, match => {
-    return `<span style="background-color: limegreen; color: black; font-weight: bold;">${match}</span>`;
+    const key = match.toLowerCase();
+    keywordCounter[key] = (keywordCounter[key] || 0) + 1;
+    const id = `${key.replace(/\s+/g, "-")}-${keywordCounter[key]}`;
+
+    if (!keywordOccurrences[key]) keywordOccurrences[key] = [];
+    keywordOccurrences[key].push(id);
+
+    return `<span id="${id}" style="background-color: #faad14; color: black; font-weight: bold;">${match}</span>`;
   });
 
   try {
     parent.replaceChild(span, textNode);
-  } catch (e) {
-    // Ignore nodes that can't be replaced
-  }
+  } catch (e) {}
 }
 
 function highlightKeywordsIn(container) {
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   const nodes = [];
   const matchedKeywords = [];
+
+  // Reset
+  Object.keys(keywordOccurrences).forEach(k => delete keywordOccurrences[k]);
+  Object.keys(keywordCounter).forEach(k => delete keywordCounter[k]);
 
   while (walker.nextNode()) nodes.push(walker.currentNode);
 
@@ -40,8 +115,8 @@ function highlightKeywordsIn(container) {
     }
   });
 
-  if (matchedKeywords.length > 0) {
-    const unique = [...new Set(matchedKeywords)];
+  const unique = [...new Set(matchedKeywords)];
+  if (unique.length > 0) {
     createBanner({
       text: "Sponsorship-related terms detected:",
       keywords: unique,
@@ -95,17 +170,74 @@ function createBanner({ text, keywords = [], background, borderColor }) {
 
   banner.innerHTML = "";
 
-  const styledKeywords = keywords.map(kw => {
-    return `<span style="color: black; font-weight:bold;">${kw}</span>`;
-  }).join(", ");
-
   const message = document.createElement("div");
-  message.innerHTML = keywords.length > 0
-    ? `${text} ${styledKeywords}`
-    : text;
+  if (keywords.length > 0) {
+    const parts = keywords.map(kw => {
+      const key = kw.toLowerCase();
+      const ids = keywordOccurrences[key] || [];
+      const base = key.replace(/\s+/g, "-");
+
+      if (ids.length === 1) {
+        // Single occurrence → link the keyword itself
+        return `<a href="#${ids[0]}" onclick="event.preventDefault();document.getElementById('${ids[0]}').scrollIntoView({behavior:'smooth'});" style="font-weight: bold; color: black;">${kw}</a>`;
+      } else {
+        // Multiple → keyword + numbered links
+        const nums = ids.map((id, i) =>
+          `<a href="#${id}" onclick="event.preventDefault();document.getElementById('${id}').scrollIntoView({behavior:'smooth'});">${i + 1}</a>`
+        ).join(" ");
+        return `<span style="font-weight: bold;">${kw}</span> ${nums}`;
+      }
+    }).join(", ");
+
+    message.innerHTML = `${text} ${parts}`;
+  } else {
+    message.textContent = text;
+  }
+
+  // Add company sponsorship info if applicable
+  if (currentCompanySponsorsVisas) {
+    const companyInfo = document.createElement("div");
+    companyInfo.innerHTML = `<div style="margin-top: 8px; font-weight: bold; color: #52c41a;">✓ This company has sponsored visas in the past</div>`;
+    message.appendChild(companyInfo);
+  }
 
   banner.appendChild(message);
-  banner.appendChild(closeBtn);
+  const infoIcon = document.createElement("span");
+  infoIcon.innerHTML = "&#9432;"; // Minimal ⓘ icon
+  infoIcon.style.cssText = `
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 20px;
+    color: #000;
+    cursor: default;
+    user-select: none;
+  `;
+
+  // Create custom tooltip
+  const tooltip = document.createElement("div");
+  tooltip.textContent = "Click on the keywords to jump to their location in the job description.";
+  tooltip.style.cssText = `
+    position: absolute;
+    right: 0;
+    top: 32px;
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+  `;
+  infoIcon.onmouseenter = () => tooltip.style.opacity = "1";
+  infoIcon.onmouseleave = () => tooltip.style.opacity = "0";
+
+  banner.appendChild(infoIcon);
+  banner.appendChild(tooltip);
+  // banner.appendChild(closeBtn);
 
   const tryInsert = () => {
     const mt4Div = document.querySelector("div.mt4");
@@ -167,16 +299,24 @@ function waitForJobChanges() {
         const oldBanner = document.getElementById("keyword-alert-banner");
         if (oldBanner) oldBanner.remove();
 
+        // Check if the company sponsors visas before handling the job description
+        checkCurrentCompany();
         handleJobDescriptionChange();
       }
     }, 250);
   });
 
   observer.observe(wrapper, { childList: true, subtree: true });
+  
+  // Check if company sponsors visas
+  checkCurrentCompany();
   handleJobDescriptionChange();
 }
 
 window.addEventListener("load", () => {
+  // Load companies first
+  loadSponsoringCompanies();
+  
   const checkInterval = setInterval(() => {
     const wrapper = document.querySelector(".jobs-search__job-details--wrapper");
     if (wrapper) {
