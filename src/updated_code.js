@@ -41,35 +41,37 @@ function loadSponsoringCompanies() {
 
 // Check if current company is in our sponsoring companies list
 function checkCurrentCompany() {
-  // Reset the flag
   currentCompanySponsorsVisas = false;
 
-  // Attempt to find the company name element
   const companyNameElement = document.querySelector("a[data-test-app-aware-link]");
-
-  if (companyNameElement) {
-    const companyName = companyNameElement.textContent.trim().toLowerCase();
-
-    // Stronger matching: exact, starts with, or contains with word boundaries
-    currentCompanySponsorsVisas = sponsoringCompanies.some(company => {
-      const cleanCompany = company.toLowerCase();
-      
-      // Exact match
-      if (companyName === cleanCompany) return true;
-
-      // Starts with (e.g., "google llc" matches "google")
-      if (cleanCompany.startsWith(companyName) || companyName.startsWith(cleanCompany)) return true;
-
-      // Word-boundary match inside longer name (e.g., "google" in "google inc.")
-      const regex = new RegExp(`\\b${cleanCompany}\\b`, "i");
-      return regex.test(companyName);
-    });
-
-    console.log("[Visa Scanner] Detected company:", companyName);
-    console.log("[Visa Scanner] Sponsorship match found?", currentCompanySponsorsVisas);
-  } else {
-    console.warn("[Visa Scanner] Could not find company name element on the page.");
+  if (!companyNameElement) {
+    console.warn("[Visa Scanner] Company name element not found.");
+    return;
   }
+
+  const companyName = companyNameElement.textContent.trim().toLowerCase();
+  console.log("[Visa Scanner] Detected company name:", companyName);
+
+  // Normalize company name for flexible matching
+  const normalize = str =>
+    str
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") // remove punctuation
+      .replace(/\s+/g, " ")                        // remove extra spaces
+      .trim()
+      .toLowerCase();
+
+  const normalizedCompany = normalize(companyName);
+
+  currentCompanySponsorsVisas = sponsoringCompanies.some(rawCompany => {
+    const normalizedSponsor = normalize(rawCompany);
+    return (
+      normalizedCompany === normalizedSponsor ||                   // exact
+      normalizedCompany.startsWith(normalizedSponsor) ||          // e.g. "google inc" vs "google"
+      normalizedSponsor.startsWith(normalizedCompany)             // reverse case
+    );
+  });
+
+  console.log("[Visa Scanner] Sponsorship match found?", currentCompanySponsorsVisas);
 }
 
 
