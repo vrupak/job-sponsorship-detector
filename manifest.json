@@ -7,7 +7,7 @@
   "content_scripts": [
     {
       "matches": ["*://www.linkedin.com/jobs/*"],
-      "js": ["src/sponsorship-checker-updated.js"],
+      "js": ["src/updated_extension_code.js"],
       "run_at": "document_idle"
     }
   ],
