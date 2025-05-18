@@ -178,10 +178,8 @@ function createBanner({ text, keywords = [], background, borderColor }) {
       const base = key.replace(/\s+/g, "-");
 
       if (ids.length === 1) {
-        // Single occurrence → link the keyword itself
         return `<a href="#${ids[0]}" onclick="event.preventDefault();document.getElementById('${ids[0]}').scrollIntoView({behavior:'smooth'});" style="font-weight: bold; color: black;">${kw}</a>`;
       } else {
-        // Multiple → keyword + numbered links
         const nums = ids.map((id, i) =>
           `<a href="#${id}" onclick="event.preventDefault();document.getElementById('${id}').scrollIntoView({behavior:'smooth'});">${i + 1}</a>`
         ).join(" ");
@@ -194,7 +192,7 @@ function createBanner({ text, keywords = [], background, borderColor }) {
     message.textContent = text;
   }
 
-  // Add company sponsorship info if applicable
+  // Company sponsorship info
   if (currentCompanySponsorsVisas) {
     const companyInfo = document.createElement("div");
     companyInfo.innerHTML = `<div style="margin-top: 8px; font-weight: bold; color: #52c41a;">✓ This company has sponsored visas in the past</div>`;
@@ -202,42 +200,46 @@ function createBanner({ text, keywords = [], background, borderColor }) {
   }
 
   banner.appendChild(message);
-  const infoIcon = document.createElement("span");
-  infoIcon.innerHTML = "&#9432;"; // Minimal ⓘ icon
-  infoIcon.style.cssText = `
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 20px;
-    color: #000;
-    cursor: default;
-    user-select: none;
-  `;
 
-  // Create custom tooltip
-  const tooltip = document.createElement("div");
-  tooltip.textContent = "Click on the keywords to jump to their location in the job description.";
-  tooltip.style.cssText = `
-    position: absolute;
-    right: 0;
-    top: 32px;
-    background: #333;
-    color: #fff;
-    padding: 6px 10px;
-    font-size: 12px;
-    border-radius: 4px;
-    white-space: nowrap;
-    z-index: 1001;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
-  `;
-  infoIcon.onmouseenter = () => tooltip.style.opacity = "1";
-  infoIcon.onmouseleave = () => tooltip.style.opacity = "0";
+  // Only show info icon when keywords are found
+  if (keywords.length > 0) {
+    const infoIcon = document.createElement("span");
+    infoIcon.innerHTML = "&#9432;";
+    infoIcon.style.cssText = `
+      position: absolute;
+      right: 4px;
+      bottom: 0px;
+      font-size: 20px;
+      color: #000;
+      cursor: default;
+      user-select: none;
+    `;
 
-  banner.appendChild(infoIcon);
-  banner.appendChild(tooltip);
-  // banner.appendChild(closeBtn);
+    const tooltip = document.createElement("div");
+    tooltip.textContent = "Click on the keywords to jump to their location in the job description.";
+    tooltip.style.cssText = `
+      position: absolute;
+      right: 0;
+      top: 32px;
+      background: #333;
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+    `;
+    infoIcon.onmouseenter = () => tooltip.style.opacity = "0.8";
+    infoIcon.onmouseleave = () => tooltip.style.opacity = "0";
+
+    banner.appendChild(infoIcon);
+    banner.appendChild(tooltip);
+  }
+
+  banner.appendChild(closeBtn);
 
   const tryInsert = () => {
     const mt4Div = document.querySelector("div.mt4");
