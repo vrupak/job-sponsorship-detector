@@ -1,14 +1,17 @@
 # LinkedIn Sponsorship Keyword Highlighter Extension
 
-This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, Visa, Green Card) inside LinkedIn job descriptions. It works even when job descriptions are dynamically loaded without page refresh.
+Highlights H1B and visa-related keywords in LinkedIn job descriptions and marks companies that sponsored visas in 2024 with a ✓. Displays a smart, dismissible banner with keyword links, a helpful tooltip, and auto-refresh as you switch job listings.
 
 ---
 
 ## Features
 
 * Detects and highlights keywords like `H1B`, `visa`, `sponsorship`, `OPT`, `CPT`, etc.
-* Detects companies that have sponsored visas in the past, based on the official USCIS 2024 H-1B Sponsor List.
-* Displays a summary banner indicating detected keywords or absence of sponsorship terms
+* Detects companies with a green checkmark ✓ that have sponsored visas in 2024, based on the official [USCIS 2024 H-1B Employer Data Hub](https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub).
+* Displays a dismissible banner with:
+   - A summary of all detected keywords
+   - Links that jump to the keyword location in the job description
+   - A tooltip (`ⓘ`) with usage instructions (only shown if keywords are found)
 * Smart detection that refreshes highlights and banner when browsing between job listings
 * Sunset Orange background with black text for keyword visibility
 * Automatically works as you browse different job listings
@@ -39,16 +42,22 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 
 ## How It Works
 
-* Uses a MutationObserver to detect when new job descriptions are loaded
-* Uses a TreeWalker to efficiently scan and highlight only the relevant text nodes
-* Shows a dismissible banner with detected sponsorship keywords
-* Ensures keywords and banners reset with each new job listing
+* **MutationObserver** watches for dynamic changes when job listings are switched without page reload
+* **TreeWalker** scans only text nodes inside the job description and highlights matched keywords
+* **Banner** is created and injected with:
+  - Custom styles
+  - Keyword links with scroll behavior
+  - Optional company sponsorship note
+  - Dismiss (✖) button that hides the banner until a new job is selected
+* **Company CSV** (`data/companies.csv`) is loaded once and matched with the job posting’s company name
+* **Tooltip Info Icon (ⓘ)** appears only if keywords are found; shows a tooltip on hover with 80% opacity
 
 ---
 
 ## Known Limitations
 
-* Doesn’t work outside LinkedIn job pages
+* Doesn’t work outside [LinkedIn job pages](https://www.linkedin.com/jobs/)
 * Doesn’t currently support saving custom keywords (planned feature)
+* Matching company names from the CSV may not be 100% accurate (uses partial matching logic)
 
 ---

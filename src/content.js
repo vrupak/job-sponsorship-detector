@@ -195,7 +195,7 @@ function createBanner({ text, keywords = [], background, borderColor }) {
   // Company sponsorship info
   if (currentCompanySponsorsVisas) {
     const companyInfo = document.createElement("div");
-    companyInfo.innerHTML = `<div style="margin-top: 8px; font-weight: bold; color: #52c41a;">✓ This company has sponsored visas in the past</div>`;
+    companyInfo.innerHTML = `<div style="margin-top: 8px; font-weight: bold; color: #52c41a;">✓ This company has sponsored visas in 2024</div>`;
     message.appendChild(companyInfo);
   }
 
