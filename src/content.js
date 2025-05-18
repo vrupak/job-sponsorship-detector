@@ -15,7 +15,7 @@ function highlightText(textNode) {
 
   const span = document.createElement("span");
   span.innerHTML = textNode.textContent.replace(keywordRegex, match => {
-    return `<span style="background-color: limegreen; color: black; font-weight: bold;">${match}</span>`;
+    return `<span style="background-color: #faad14; color: black; font-weight: bold;">${match}</span>`;
   });
 
   try {
