@@ -7,6 +7,7 @@ This Chrome extension highlights visa sponsorship-related keywords (e.g., H1B, V
 ## Features
 
 * Detects and highlights keywords like `H1B`, `visa`, `sponsorship`, `OPT`, `CPT`, etc.
+* Detects companies that have sponsored visas in the past, based on the official USCIS 2024 H-1B Sponsor List.
 * Displays a summary banner indicating detected keywords or absence of sponsorship terms
 * Smart detection that refreshes highlights and banner when browsing between job listings
 * Green background with black text for keyword visibility
