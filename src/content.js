@@ -131,7 +131,42 @@ function createBanner({ text, keywords = [], background, borderColor }) {
   }
 
   banner.appendChild(message);
-  banner.appendChild(closeBtn);
+  const infoIcon = document.createElement("span");
+  infoIcon.innerHTML = "&#9432;"; // Minimal ⓘ icon
+  infoIcon.style.cssText = `
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 20px;
+    color: #000;
+    cursor: default;
+    user-select: none;
+  `;
+
+  // Create custom tooltip
+  const tooltip = document.createElement("div");
+  tooltip.textContent = "Click on the keywords to jump to their location in the job description.";
+  tooltip.style.cssText = `
+    position: absolute;
+    right: 0;
+    top: 32px;
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+  `;
+  infoIcon.onmouseenter = () => tooltip.style.opacity = "1";
+  infoIcon.onmouseleave = () => tooltip.style.opacity = "0";
+
+  banner.appendChild(infoIcon);
+  banner.appendChild(tooltip);
+  // banner.appendChild(closeBtn);
 
   const tryInsert = () => {
     const mt4Div = document.querySelector("div.mt4");
