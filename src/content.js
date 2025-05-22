@@ -61,6 +61,26 @@ function loadSponsoringCompanies() {
     });
 }
 
+function setupJobClickListener() {
+  document.body.addEventListener("click", (e) => {
+    const link = e.target.closest("a.job-card-container__link");
+    if (link) {
+      // Remove any existing banner immediately
+      const oldBanner = document.getElementById("keyword-alert-banner");
+      if (oldBanner) oldBanner.remove();
+
+      const jobContent = document.querySelector("#job-details");
+      if (jobContent) {
+        delete jobContent.dataset.keywordsHighlighted;
+        delete jobContent.dataset.bannerDismissed;
+      }
+
+      // Show loader immediately
+      createLoadingBanner();
+    }
+  });
+}
+
 // Check if current company is in our sponsoring companies list
 function checkCurrentCompany() {
   currentCompanySponsorsVisas = false;
@@ -143,6 +163,61 @@ function highlightKeywordsIn(container) {
       background: "#e6f7ff",
       borderColor: "#1890ff"
     });
+  }
+}
+
+function createLoadingBanner() {
+  const jobContent = document.querySelector("#job-details");
+  if (!jobContent) return;
+
+  const existing = document.getElementById("keyword-alert-banner");
+  if (existing) existing.remove();
+
+  const loadingBanner = document.createElement("div");
+  loadingBanner.id = "keyword-alert-banner";
+  loadingBanner.style.cssText = `
+    background: #f0f0f0;
+    color: #000;
+    padding: 12px 16px;
+    border-left: 5px solid #aaa;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 16px;
+    position: relative;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `;
+
+  const spinner = document.createElement("div");
+  spinner.style.cssText = `
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-top: 2px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  `;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const text = document.createElement("span");
+  text.textContent = "Loading sponsorship data...";
+
+  loadingBanner.appendChild(spinner);
+  loadingBanner.appendChild(text);
+
+  const mt4Div = document.querySelector("div.mt4");
+  if (mt4Div && mt4Div.parentElement) {
+    mt4Div.parentElement.insertBefore(loadingBanner, mt4Div.nextSibling);
   }
 }
 
@@ -268,11 +343,7 @@ function createBanner({ text, keywords = [], background, borderColor }) {
 
 function handleJobDescriptionChange() {
   const jobContent = document.querySelector("#job-details");
-  if (
-    !jobContent ||
-    jobContent.dataset.keywordsHighlighted === "true" ||
-    jobContent.dataset.bannerDismissed === "true"
-  ) return;
+  if (!jobContent || jobContent.dataset.bannerDismissed === "true") return;
 
   const maxRetries = 20;
   let tries = 0;
@@ -280,10 +351,16 @@ function handleJobDescriptionChange() {
   const waitForContent = () => {
     const text = jobContent.innerText.trim();
     if (text.length > 50) {
+      const oldBanner = document.getElementById("keyword-alert-banner");
+      if (oldBanner) oldBanner.remove(); // remove loading banner
+
       highlightKeywordsIn(jobContent);
       jobContent.dataset.keywordsHighlighted = "true";
     } else if (tries++ < maxRetries) {
       setTimeout(waitForContent, 200);
+    }
+    if (tries >= maxRetries) {
+      console.warn("[Visa Scanner] Job content did not load in time.");
     }
   };
 
@@ -296,6 +373,7 @@ function waitForJobChanges() {
 
   let lastJobText = "";
   let debounceTimer;
+  let lastJobId = "";
 
   const observer = new MutationObserver(() => {
     clearTimeout(debounceTimer);
@@ -304,22 +382,26 @@ function waitForJobChanges() {
       const jobContent = document.querySelector("#job-details");
       if (!jobContent) return;
 
-      const currentText = jobContent.innerText.trim();
-      if (currentText && currentText !== lastJobText) {
-        lastJobText = currentText;
+      const currentJobId = getCurrentJobId();
+      if (!currentJobId || currentJobId === lastJobId) return;
 
-        delete jobContent.dataset.keywordsHighlighted;
-        delete jobContent.dataset.bannerDismissed;
+      lastJobId = currentJobId;
 
-        const oldBanner = document.getElementById("keyword-alert-banner");
-        if (oldBanner) oldBanner.remove();
+      // Remove old banner and state
+      const oldBanner = document.getElementById("keyword-alert-banner");
+      if (oldBanner) oldBanner.remove();
 
-        // Check if the company sponsors visas before handling the job description
-        checkCurrentCompany();
-        handleJobDescriptionChange();
-        markSponsoringCompaniesInSidebar();
-      }
-    }, 250);
+      delete jobContent.dataset.keywordsHighlighted;
+      delete jobContent.dataset.bannerDismissed;
+
+      // Show loader immediately
+      createLoadingBanner();
+
+      // Wait for real content and process
+      checkCurrentCompany();
+      handleJobDescriptionChange();
+      markSponsoringCompaniesInSidebar();
+    }, 100); // shorter debounce = faster
   });
 
   observer.observe(wrapper, { childList: true, subtree: true });
@@ -330,17 +412,22 @@ function waitForJobChanges() {
 }
 
 window.addEventListener("load", () => {
-  // Load companies first
   loadSponsoringCompanies();
-  
+
   const checkInterval = setInterval(() => {
     const wrapper = document.querySelector(".jobs-search__job-details--wrapper");
     if (wrapper) {
       clearInterval(checkInterval);
       waitForJobChanges();
+      setupJobClickListener(); // add this line
     }
   }, 500);
 });
+
+function getCurrentJobId() {
+  const url = new URL(window.location.href);
+  return url.searchParams.get("currentJobId") || "";
+}
 
 function markSponsoringCompaniesInSidebar() {
   try {
