@@ -4,7 +4,7 @@ const keywords = [
   "authorization", "authorized", "citizen", "resident",
   "EAD", "employment authorization", "TN visa", "L1", "L-1",
   "O-1", "J-1", "F1", "F-1", "GC", "international candidate",
-  "US work eligibility"
+  "US work eligibility", "citizenship", "permanent resident",
 ];
 
 // Companies that have sponsored visas in the past (will be loaded from CSV)
