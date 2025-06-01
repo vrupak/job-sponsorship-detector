@@ -52,7 +52,7 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions, marks com
 ## Note
 
 * Even if some companies show the H1B icon next to them, it’s best to check the banner for confirmation, as they may still require citizenship or similar conditions.
-
+* If there are any highlighted keywords in the banner, make sure to click on them — this will scroll down to where the keyword is mentioned. Be sure to read the full sentence to understand the context in which the keyword is used.
 ---
 
 ## How It Works
