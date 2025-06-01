@@ -12,6 +12,18 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions, marks com
    - A summary of all detected keywords
    - Links that jump to the keyword location in the job description
    - A tooltip (`ⓘ`) with usage instructions (only shown if keywords are found)
+<div style="text-align: center;">
+  <img src="https://drive.usercontent.google.com/download?id=189D_VwyOwlOOnN1bJyhEpqF8ufOTswvZ&export=view&authuser=0" alt="No keyword detected" width="200"/><br/>
+  <small>No keyword detected</small>
+</div>
+
+<br/>
+
+<div style="text-align: center;">
+  <img src="https://drive.google.com/uc?export=view&id=189D_VwyOwlOOnN1bJyhEpqF8ufOTswvZ" alt="Keyword detected" width="200"/><br/>
+  <small>Keyword detected</small>
+</div>
+
 * Adds an <img src="assets/h1b-2.png" alt="H1-B" width="30" style="vertical-align: middle;"/> icon next to company names in the job posting sidebar if they are a known visa sponsor
 * Smart detection that refreshes highlights and banner when browsing between job listings
 
