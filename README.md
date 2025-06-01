@@ -13,12 +13,12 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions, marks com
    - Links that jump to the keyword location in the job description
    - A tooltip (`ⓘ`) with usage instructions (only shown if keywords are found)
 <p align="center">
-  <img src="https://drive.usercontent.google.com/download?id=1aZY3-_Kg0AXbq4wa1zaOV59FnBTBxGDb&export=view&authuser=0" alt="No keyword detected" width="60%"><br>
+  <img src="https://drive.usercontent.google.com/download?id=1aZY3-_Kg0AXbq4wa1zaOV59FnBTBxGDb&export=view&authuser=0" alt="No keyword detected" width="80%"><br>
   <small>No keyword detected</small>
 </p>
 
 <p align="center">
-  <img src="https://drive.usercontent.google.com/download?id=189D_VwyOwlOOnN1bJyhEpqF8ufOTswvZ&export=view&authuser=0" alt="Keyword detected" width="60%"><br>
+  <img src="https://drive.usercontent.google.com/download?id=189D_VwyOwlOOnN1bJyhEpqF8ufOTswvZ&export=view&authuser=0" alt="Keyword detected" width="80%"><br>
   <small>Sponsorship related keyword detected</small>
 </p>
 
