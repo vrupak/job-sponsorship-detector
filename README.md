@@ -7,6 +7,7 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions, marks com
 ## Features
 
 * Detects and highlights keywords like `H1B`, `visa`, `sponsorship`, `OPT`, `CPT`, etc.
+* Adds an <img src="assets/h1b-2.png" alt="H1-B" width="30" style="vertical-align: middle;"/> icon next to company names in the job posting sidebar if they are a known visa sponsor
 * Detects companies with a green checkmark ✓ that have sponsored visas in 2024, based on the official [USCIS 2024 H-1B Employer Data Hub](https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub).
 * Displays a dismissible banner with:
    - A summary of all detected keywords
@@ -21,9 +22,6 @@ Highlights H1B and visa-related keywords in LinkedIn job descriptions, marks com
   <img src="https://drive.usercontent.google.com/download?id=189D_VwyOwlOOnN1bJyhEpqF8ufOTswvZ&export=view&authuser=0" alt="Keyword detected" width="80%"><br>
   <small>Sponsorship related keyword detected</small>
 </p>
-
-* Adds an <img src="assets/h1b-2.png" alt="H1-B" width="30" style="vertical-align: middle;"/> icon next to company names in the job posting sidebar if they are a known visa sponsor
-* Smart detection that refreshes highlights and banner when browsing between job listings
 
 ---
 
